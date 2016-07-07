@@ -6,7 +6,7 @@
 sampler3D _LightVolumeR;
 sampler3D _LightVolumeG;
 sampler3D _LightVolumeB;
-// light probes position and size
+// Light probes position and size
 float3 _LightVolumeMin;
 float3 _LightVolumeSize;
 
@@ -15,7 +15,7 @@ inline float3 VolumeSH12Order(float4 normal, float3 worldPos,float3 ambient)
 	
 	float3 pos = ((worldPos - _LightVolumeMin) / _LightVolumeSize);
 
-	// Acculmulate R G B intensity
+	// Accumulate R G B intensity
 	half3 x1;
 	x1.r = dot(normal, tex3Dlod(_LightVolumeR, float4(pos, 0)) * 2 - 1);
 	x1.g = dot(normal, tex3Dlod(_LightVolumeG, float4(pos, 0)) * 2 - 1);

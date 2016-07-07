@@ -2,30 +2,56 @@
 
 using UnityEngine;
 using System.Collections;
-
+[ExecuteInEditMode]
 public class CreateLightVolume : MonoBehaviour {
-    
-
-	void Start ()
-    {
-        BuildLightVolume();
-
-    }
-	
-
 
     public Vector3 resoultion = new Vector3(1, 0.25f, 0.5f);
     public Vector3 maxVolumeSize = new Vector3(256, 128, 128);
 
-    public Texture3D[] _volumeLightProbe = new Texture3D[3];
+    public Texture3D[] _volumeLightProbe;
     public Vector3 _minVec;
     public Vector3 _volumeTexSize;
     public Color _defaultLightProbeColor;
     int _colorChannel = 3;
 
-    void BuildLightVolume()
+
+    void Start ()
+    {
+        _volumeLightProbe = new Texture3D[3];
+        BuildLightVolume();
+
+    }
+
+    bool CheckLightProbe()
     {
         LightProbes probes = LightmapSettings.lightProbes;
+        if (probes == null)
+        {
+            CreateDefaultVolume();
+            return false;
+        }
+
+        return true;
+    }
+    void OnValidate()
+    {
+        if(!CheckLightProbe())
+            return;
+
+        BuildLightVolume();
+   
+    }
+
+    void BuildLightVolume()
+    {
+
+        LightProbes probes = LightmapSettings.lightProbes;
+
+        if (probes == null || probes.positions.Length < 1)
+        {
+            CreateDefaultVolume();
+            return;
+        }
 
         // Calculate the bounding of light probes
         Vector3 maxVec = new Vector3(float.MinValue, float.MinValue, float.MinValue);
@@ -37,11 +63,6 @@ public class CreateLightVolume : MonoBehaviour {
             minVec = Vector3.Min(vec, minVec);
         }
 
-        if (probes == null || probes.positions.Length < 1)
-        {
-            CreateDefaultVolume();
-            return;
-        }
 
         // Compute the size of volume texture according to _resoultion
         Vector3 center = (maxVec + minVec) / 2;
@@ -117,7 +138,7 @@ public class CreateLightVolume : MonoBehaviour {
         }
 
 
-        // Set paramerters to all shaders
+        // Set parameters to all shaders
         Shader.SetGlobalTexture("_LightVolumeR", _volumeLightProbe[0]);
         Shader.SetGlobalTexture("_LightVolumeG", _volumeLightProbe[1]);
         Shader.SetGlobalTexture("_LightVolumeB", _volumeLightProbe[2]);
